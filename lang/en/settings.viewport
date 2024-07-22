@@ -1,0 +1,21 @@
+# Settings
+
+Every program should be configurable, so the Portfolio Viewer (of course) is also customizable according to the user's preferences. Languages, colors, cookies, you can change it all here ;)
+
+## Displayed Language
+Hand-translated by real linguists (me), users from all over the world should be able to navigate, everyone should know the Boris (without Becker, Borisov, or Johnson)!
+![[cfg(Deutsch):language]]
+
+## Displayed Color Scheme
+Your favorite scheme is Dark, Colorful, or Light (ugh)? Treat yourself then ;)
+![[cfg(dark:Dark;light:Light;caligraphy:Caligraphy):color]]
+
+## Font and Font Size
+Is the font too heavy to read? Adjust it so your beautiful eyes can look beautiful.
+![[cfg:font]]
+![[cfg:font-size]]
+
+## Reset
+Don't like how you've set up the Portfolio Viewer? No worries, resetting to default values is really not a big deal... plus, it's the original look, right?
+![[cfg(Reset):reset]]
+

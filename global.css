@@ -1,0 +1,486 @@
+:root {
+  --black: rgb(30 30 30);
+  --dark-gray: rgb(38 38 38);
+  --gray: rgb(54 54 54);
+  --light-gray: rgb(112 112 112);
+  --light: rgb(226 226 226);
+  --white: rgb(255 255 255);
+
+  font-family: 'Roboto';
+  --unbound-font-size: 12;
+  --font-size: 12pt;
+
+  --tabs-percentage: 4.25%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--gray);
+  margin: 0;
+}
+
+header {
+  width: 100%;
+  height: var(--tabs-percentage);
+}
+
+h1 {
+  font-weight: 400;
+  font-size: calc(2.5 * var(--font-size));
+  color: var(--light);
+}
+
+h2, p, .select {
+  font-size: var(--font-size);
+  line-height: calc(1.4 * var(--font-size));
+  color: var(--light);
+}
+
+p, .select {
+  font-weight: 300;
+}
+
+h2 {
+  font-weight: 500;
+  margin-top: 2.5em;
+}
+
+img {
+  max-width: 100%;
+}
+
+iframe {
+  width: 100%;
+  pointer-events: none;
+}
+
+button {
+  border: 1px solid var(--light-gray);
+  background-color: var(--gray);
+  font-size: var(--font-size);
+  padding: 0.25em 0 0.35em 0;
+  width: 25%;
+  color: var(--light);
+  cursor: pointer;
+}
+
+
+.hyperlink, a{
+  text-decoration: underline;
+  cursor: pointer;
+  color: var(--white);
+}
+
+input[type=number] {
+  display: inline-block;
+  appearance: textfield;
+  border: 1px solid var(--light-gray);
+  background-color: var(--dark);
+  font-size: var(--font-size);
+  color: var(--light);
+  width: 6ch;
+  padding: 0.2em 0.35em;
+  margin: 1em 2em 0 0.15em;
+  transform: translateY(-25%) scale(110%);
+}
+
+.select {
+  display: inline-block;
+  --char-padding: 2ch;
+  cursor: pointer;
+  position: relative;
+  fill: var(--light);
+  background-color: var(--gray);
+  padding: 0.2em 0.35em 1px 0.35em;
+  width: 40%;
+  margin-right: 2em;
+  border: 1px solid var(--light-gray);
+}
+
+.select[data-open=true] {
+  border-bottom-color: transparent;
+}
+
+.label {
+  display: flex;
+  position: relative;
+  justify-content: self;
+}
+
+.label::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: calc(100% - var(--char-padding) * 1.3);
+  height: 1px;
+  bottom: -7.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--light-gray);
+}
+
+.select[data-open=false] > .label::after {
+  display: none;
+}
+
+.label > svg {
+  transform: translateY(-1px);
+  scale: calc(var(--unbound-font-size) / 14);
+}
+
+.label > span {
+  display: flex;
+  align-items: center;
+}
+
+.select[data-open=false] > .label > svg {
+  transform: rotate(-90deg) translateX(1px);
+}
+
+.options {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+  background-color: inherit;
+  padding: 0.25ch var(--char-padding) 0.5ch var(--char-padding);
+  border: 1px solid var(--light-gray);
+  border-top: none;
+  width: calc(100% + 2px);
+  height: auto;
+  left: -1px;
+}
+
+.option {
+  padding: 1px calc(var(--char-padding) / 1.5);
+}
+
+.option[data-open=true] {
+  background-color: var(--light-gray);
+}
+
+.select[data-open=false] > .options {
+  visibility: hidden;
+}
+
+.title {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.tab-text {
+  font-size: calc(1.4 * var(--font-size)); 
+  margin: 0.3em 0.5em;
+  cursor: default;
+}
+
+.viewport {
+  display: flex;
+  height: calc(100% - var(--tabs-percentage));
+}
+
+nav {
+  height: 100%;
+  display: flex;
+}
+
+.nav-buttons {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 2.75em;
+}
+
+.nav-buttons button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  width: 100%;
+  aspect-ratio: 1/1;
+  cursor: pointer;
+  fill: var(--light);
+}
+
+.nav-buttons button[data-open=true] {
+  background-color: var(--black);
+  cursor: default;
+}
+
+#NavExplorer[data-open=true] {
+  background-color: var(--dark-gray);
+}
+
+#Explorer {
+  --left-space: 1.5ch;
+  display: block;
+  height: 100%;
+  width: 25em;
+  margin-right: 1px;
+  padding: var(--left-space) var(--left-space) var(--left-space)  0;
+  background-color: var(--dark-gray);
+}
+
+#Explorer[data-open=false] {
+  display: none;
+}
+
+.folder {
+  --bottom-space: 0.15em;
+  --line-width: 2px;
+}
+
+.folder:first-child {
+  padding-left: var(--left-space);
+}
+
+.folder:not(:first-child) > .folder-header {
+  padding-left: calc(var(--left-space) / 1.5);
+}
+
+.folder:not(:first-child) > .folder-content {
+  padding-left: calc(1.5 * var(--left-space));
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.folder[data-open=false] .folder-arrow {
+  transform: rotate(-90deg); 
+}
+
+.file {
+  color: var(--light);
+  font-size: var(--font-size);
+  padding: var(--bottom-space) var(--left-space);
+  cursor: pointer;
+}
+
+.folder-header {
+  color: var(--light);
+  fill: var(--light-gray);
+  font-size: var(--font-size);
+}
+
+.file[data-open=true],
+.folder-header[data-open=true] {
+  background-color: var(--gray);
+}
+
+.folder-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: auto;
+  padding-left: 1.25ch;
+}
+
+.folder[data-open=false] .folder-content {
+  height: 0; 
+  overflow: hidden;
+}
+
+.folder-content::before {
+  position: absolute;
+  content: "";
+  background-color: var(--gray);
+  height: 100%;
+  width: var(--line-width);
+}
+
+#Editor {
+  display: flex;
+  justify-content: center;
+  background-color: var(--black);
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+article {
+  width: 86ch;
+  height: fit-content;
+  padding-top: 3em;
+}
+
+footer {
+  margin: 7.5em 0 2.5em 0;
+}
+
+footer p {
+  text-align: right;
+  font-size: calc(var(--font-size) / 1.2);
+  color: var(--light-gray);
+  cursor: default;
+}
+
+article[data-open=false] {
+  display: none;
+}
+
+article img {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+article img,
+article iframe {
+  max-width: 100%;
+  max-height: 480px;
+  margin: 2em 0;
+  height: auto;
+}
+
+article iframe.rect {
+  aspect-ratio: 16/9;
+}
+
+article iframe.tv {
+  aspect-ratio: 4/3;
+}
+
+article iframe.square {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  aspect-ratio: 1/1;
+  width: 75%;
+}
+
+article figure.vref {
+  display: inline-block;
+  position: relative;
+  aspect-ratio: 1/1;
+  width: 25%;
+  cursor: pointer;
+}
+
+article .vrefs {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+article .vrefs > figure.vref {
+  display: block;
+  margin: 1em 2em;
+}
+
+article figure.vref > img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+
+  transition: filter 200ms;
+}
+
+article figure.vref > figcaption {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  width: 90%;
+  text-align: center;
+  color: transparent;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+
+  transition: color 200ms;
+}
+
+@media (any-hover: hover) {
+  .file:hover, .folder-header:hover,
+  .folder-header:hover > .folder-arrow {
+    background-color: var(--gray);
+  }
+
+  .nav-buttons button[data-open=false]:hover {
+    background-color: rgba(30, 30, 30, 0.5);
+  }
+
+  .option:hover {
+    background-color: var(--light-gray);
+  }
+
+  .select[data-open=false]:hover,
+  button:hover {
+    background-color: var(--light-gray);
+  }
+
+  .hyperlink:hover,
+  a:hover {
+    opacity: 50%;
+  }
+
+  article figure.vref:hover > img {
+    filter: brightness(20%) blur(4px) saturate(75%);
+  }
+
+  article figure.vref:hover > figcaption {
+    color: white;
+    mix-blend-mode: difference;
+  }
+}
+
+@media (max-width: 1024px) {
+  h2, p {
+    line-height: calc(1.6 * var(--font-size));
+  }
+
+  .vref {
+    flex: 1 1 100%;
+  }
+
+  #Explorer {
+    width: calc(100vw - 2.75em);
+  }
+
+  .folder {
+    max-width: 512px;
+  }
+
+  article {
+    max-width: 80vw;
+  }
+
+  button {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .select {
+    width: 100%;
+    max-width: 350px;
+  }
+}
+
+@media (max-height: 600px) {
+  header {
+    display: none;
+  }
+
+  .viewport {
+    height: 100%;
+  }
+}
+

@@ -1,0 +1,8 @@
+# Unreal Raum
+*Unreal Raum* ist ein *echtzeitgerendertes* Animationsvideo, welches im Winter 2021/2022 im Unterricht entstand. Dargestellt ist ein Wohnzimmer, welches mein eigenes Wohnzimmer nahe kommt.
+![[yt(rect):t3ODIiEGAok]]
+Der Name *Unreal* leitet sich von dem Programm *Unreal Engine* ab. Unreal Engine ist eine 3D-Software zum erstellen von Videospielen, interaktiven Medien und Filmen.
+![[unrealRoom0.jpg]]
+*Echtzeitgerendert* bedeutet, dass das gesamte Video zum abspeichern so lange gedauert hat, wie das Video selbst. Bedeutet, wenn 1 Sekunde des Videos vergehen, so hat das Rendern selbst auch nur 1 Sekunde gedauert. Klassischere Filmrendermethoden nutzen physikalisch akkurate Lichtberechnungsalgorhythmen, welche besonders Rechenintensiv sind. In dem Renderer von Unreal Engine wird besonders viel geschummelt, um dem realismus nahe zu kommen und gleichzeitig dabei ressourcensparsam und schnell zu bleiben.
+![[unrealRoom1.jpg]]
+Danke an *Steinböck Manuel*.

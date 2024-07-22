@@ -1,0 +1,34 @@
+{
+  "languages": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "colors": {
+    "dark": {
+      "black": "#1e1e1e",
+      "dark-gray": "#262626",
+      "gray": "#363636",
+      "light-gray": "#707070",
+      "light": "#e2e2e2",
+      "white": "#ffffff"
+    },
+    "light": {
+      "black": "#e8e8db",
+      "dark-gray": "#b6b5a8",
+      "gray": "#cecdc0",
+      "light-gray": "#858377",
+      "light": "#636057",
+      "white": "#494846"
+    },
+    "caligraphy": {
+      "black": "#f2f2f2",
+      "dark-gray": "#b2b2b2",
+      "gray": "#8c8c8c",
+      "light-gray": "#ff4848",
+      "light": "#404040",
+      "white": "#0d0d0d"
+    }
+  },
+  "fonts": ["Fira Sans", "Montserrat", "Noto Sans", "Nunito", "Open Sans", "Poppins", "Raleway", "Roboto", "Sofia Sans"]
+}
+

@@ -1,0 +1,14 @@
+{
+  "name": "Kostadinov Boris - Portfolio Viewer",
+  "copyrightNotice": "&#169;2024 Kostadinov Boris − using AI",
+  "toolTips": {
+    "home": "Home",
+    "explorer": "Explorer",
+    "about": "About Me",
+    "contact": "Contact",
+    "copyright": "Copyright",
+    "settings": "Settings",
+    "noPage": "No Page"
+  }
+}
+

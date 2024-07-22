@@ -1,0 +1,19 @@
+# Einstellungen
+Jedes Programm sollte Konfigurierbar sein, deswegen ist der Portfolio Viewer (natürlich) auch nach Belieben des Benutzers einstellbar. Sprachen, Farben, Cookies, all das kannst Du hier verändern ;)
+
+## Angezeigte Sprache
+Handübersetzt von echten Linguisten (mir) sollten Benutzer aller Welt sich auskennen können, jeder sollte den Boris (ohne Becker, Borisov oder Johnson) wissen!
+![[cfg(Deutsch):language]]
+
+## Angezeigtes Farbeschema
+Dein Lieblingsschema ist Dunkel, Bunt oder Hell (bah)? Gönn's Dir dann ;)
+![[cfg(dark:Dunkel;light:Hell;caligraphy:Kalligrafie):color]]
+
+## Schriftart und Schriftgröße
+Dir ist die Schrift zu schwer zum lesen? Stell's Dir dann ein, damit deine schöne Augen schön schauen können.
+![[cfg:font]]
+![[cfg:font-size]]
+
+## Zurücksetzen
+Dir gefällt nicht wie du den Portfolio Viewer eingestellt hast? Keine Scharm, zurücksetzen auf Standartwerte ist echt kein Drama... außerdem ist's der Original-Look, gelt?
+![[cfg(Zurücksetzen):reset]]

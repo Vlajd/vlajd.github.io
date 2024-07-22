@@ -1,0 +1,16 @@
+# Unreal Room
+
+*Unreal Room* is a *real-time rendered* animation video created during the winter of 2021/2022 in class. It depicts a living room that closely resembles my own living room.
+
+![[yt(rect):t3ODIiEGAok]]
+
+The name *Unreal* is derived from the program *Unreal Engine*. Unreal Engine is a 3D software used to create video games, interactive media, and films.
+
+![[unrealRoom0.jpg]]
+
+*Real-time rendered* means that the entire video took as long to render as the video itself. This means that if 1 second of the video passes, the rendering itself also took only 1 second. More classical film rendering methods usually use physically accurate light calculation algorithms, which are particularly computationally intensive. In the Unreal Engine renderer, a lot of cheating is done to achieve realism while also being resource-efficient and fast.
+
+![[unrealRoom1.jpg]]
+
+Thanks to *Steinböck Manuel*.
+
