@@ -338,6 +338,21 @@ class User {
   static setLanguage(code) {
     localStorage.setItem("preferedLanguage", code);
   }
+
+  /**
+   * @return {boolean}
+   */
+  static tutorialized() {
+    const tutorialized = localStorage.getItem("tutorialized");
+    return tutorialized == "true";
+  }
+
+  /**
+   * @param {boolean} tutorialized
+   */
+  static setTutorialized(tutorialized) {
+    localStorage.setItem("tutorialized", tutorialized);
+  }
 }
 
 /**
@@ -1098,7 +1113,6 @@ class Nav {
     Explorer.onOpen = open => Nav.#explorer.setAttribute("data-open", open);
 
     ViewportPool.addOnOpen(v => {
-      console.log(v.getId());
       switch (v.getId()) {
         case "home":
           if (Nav.#current !== null)
@@ -1157,6 +1171,17 @@ class Nav {
   }
 }
 
+class Tutorial {
+  static #button = document.getElementById("PortfolioViewerHelp");
+
+  /**
+   * @param {boolean} open
+   */ 
+  static setOpen(open) {
+    Tutorial.#button.setAttribute("data-open", open);
+  }
+}
+
 /**
  * Loads extern api dependencies by inserting a script tag
  * into the head of the dom.
@@ -1187,6 +1212,8 @@ function loadAPI(src) {
 
   Nav.init();
   Explorer.init();
+
+  Tutorial.setOpen(!User.tutorialized());
 
   // Turn on the Job Pool
   setInterval(JobPool.exec);
