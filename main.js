@@ -8,14 +8,14 @@ class JobPool {
   static #running = false;
   
   /**
-   * Add a job that gets called during the next job iteration.
+   * @param {async (): void} job - Will be called on the next app iteration
    */ 
   static add(job) {
     JobPool.#jobs.push(job);
   }
 
   /**
-   * Add a job that gets called during every job iteration.
+   * @param {async (): void} job - Will be called on every iteration for the rest of the app lifetime
    */ 
   static addLoop(job) {
     JobPool.#loopJobs.push(job);
@@ -53,10 +53,18 @@ class Source {
     this.#response = response;
   }
 
+  /**
+   * Asynchronously fetches the object of the specified path
+   * @param {string} path
+   * @return {Source}
+   */
   static open(path) {
     return new Source(fetch(path));
   }
 
+  /**
+   * @return {string}
+   */
   async text() {
     const response = await this.#response; 
     if (response.ok)
@@ -66,6 +74,9 @@ class Source {
     return "";
   }
 
+  /**
+   * @return {Object}
+   */ 
   async json() {
     const response = await this.#response; 
     if (response.ok)
@@ -84,35 +95,60 @@ class Settings {
   static #isMobile = false;
   static #data;
 
+  /**
+   * Has to be called once before usage
+   */
   static init() {
+    // Open the settings file
     JobPool.add(async () => Settings.#data = await Source.open("editor.json").json());
+
+    // Update if screen changes to mobile
     JobPool.addLoop(async () => Settings.#isMobile = outerWidth <= 1024);
   }
 
+  /**
+   * @return {boolean} true if website should display mobile version
+   */ 
   static isMobile() {
     return Settings.#isMobile;
   }
 
-  static onMobile(func) {
-    if (Settings.isMobile())
-      func();
-  }
-
-  static onNonMobile(func) {
-    if (Settings.isMobile())
-      func();
-  }
-
+  /**
+   * @return {[string, string][]} All available languages
+   */ 
   static languages() {
     return Object.entries(Settings.#data.languages);
   }
 
+  /**
+   * @return {[string, string][]} All available colors
+   */ 
   static colors() {
     return Object.entries(Settings.#data.colors);
   }
 
+  /**
+   * @return {[string, string][]} All available fonts
+   */ 
   static fonts() {
     return [...Settings.#data.fonts];
+  }
+
+  /**
+   * @return {string} Currently specified link
+   */ 
+  static getLink() {
+    if (location.search == "")
+      return null;
+    else
+      return location.search.substring(1);
+  }
+
+  /**
+   * @param {string} link - Link, which should be setted
+   */ 
+  static setLink(link) {
+    history.replaceState(null, null, `?${link}`);
   }
 }
 
@@ -124,13 +160,18 @@ class Theme {
   static #currentFont;
   static #currentFontSize;
 
+  /**
+   * Resets all theme settings to the default variables
+   */ 
   static default() {
     Theme.setColor("dark");
     Theme.setFont("Roboto");
     Theme.setFontSize(12);
-    ViewportPool.softReload("settings", new SettingsParser());
   }
 
+  /**
+   * @param {string} code
+   */
   static setColor(code) {
     JobPool.add(async () => {
       const [colorCode, color] = Settings.colors().find(([key, _]) => key == code);
@@ -143,10 +184,16 @@ class Theme {
     });    
   }
 
+  /**
+   * @return {string} color code
+   */
   static currentColor() {
     return Theme.#currentColor;
   }
 
+  /**
+   * @param {string} font - Font name
+   */
   static setFont(font) {
     JobPool.add(async () => {
       WebFont.load({
@@ -162,10 +209,16 @@ class Theme {
     });
   }
 
+  /**
+   * @return {string} font name
+   */
   static currentFont() {
     return Theme.#currentFont;
   }
 
+  /**
+   * @param {number} size - Font size in pt
+   */
   static setFontSize(size) {
     document.documentElement.style.setProperty("--font-size", `${size}pt`);
     document.documentElement.style.setProperty("--unbound-font-size", size);
@@ -173,6 +226,9 @@ class Theme {
     User.setFontSize(size);
   }
 
+  /**
+   * @return {number} font size in pt
+   */
   static currentFontSize() {
     return Theme.#currentFontSize;
   }
@@ -185,6 +241,9 @@ class Language {
   static #current;
   static #data;
 
+  /**
+   * @param {string} code - Language code
+   */
   static set(code) {
     JobPool.add(async () => {
       Language.#current = code;
@@ -194,14 +253,23 @@ class Language {
     });
   }
 
+  /**
+   * @return {string} Current language code
+   */
   static current() {
     return Language.#current;
   }
 
+  /**
+   * @return {path} Path to the current language files
+   */
   static path() {
     return `lang/${Language.#current}`;
   }
 
+  /**
+   * @return {string} Copyright notice in the current language
+   */
   static copyright() {
     return Language.#data.copyrightNotice;
   }
@@ -211,38 +279,62 @@ class Language {
  * Getters and Setters for user preferences
  */ 
 class User {
+  /**
+   * @return {string} Prefered color scheme. If none, defaults to "dark".
+   */
   static preferedColor() {
     const color = localStorage.getItem("preferedColor");
     return color ? color : "dark";
   }
 
+  /**
+   * @param {string} color - Set prefered color scheme code
+   */
   static setColor(color) {
     localStorage.setItem("preferedColor", color);
   }
 
+  /**
+   * @return {string} Prefered font family. If none, defaults to "Roboto".
+   */
   static preferedFont() {
     const font = localStorage.getItem("preferedFont");
     return font ? font : "Roboto";
   }
 
+  /**
+   * @param {string} font - Set prefered font family
+   */
   static setFont(font) {
     localStorage.setItem("preferedFont", font);
   }
 
+  /**
+   * @return {number} Prefered font size. If none, defaults to 12.
+   */
   static preferedFontSize() {
     const fontSize = Number.parseInt(localStorage.getItem("preferedFontSize"));
     return fontSize ? fontSize : 12;
   }
 
+  /**
+   * @param {number} fontSize - Set prefered font size
+   */
   static setFontSize(fontSize) {
     localStorage.setItem("preferedFontSize", fontSize);
   }
 
+  /**
+   * @return {string} Prefered language code. If none, defaults to "de".
+   */
   static preferedLanguage() {
     const language = localStorage.getItem("preferedLanguage");
     return language ? language : "de";
   }
 
+  /**
+   * @param {string} code - Set prefered language code
+   */
   static setLanguage(code) {
     localStorage.setItem("preferedLanguage", code);
   }
@@ -254,6 +346,9 @@ class User {
 class ElementBuilder {
   static #currentSelect;
 
+  /**
+   * Has to be called once before usage
+   */
   static init() {
     ViewportPool.addOnOpen(() => {
       if (ElementBuilder.#currentSelect)
@@ -261,6 +356,13 @@ class ElementBuilder {
     });
   }
 
+  /**
+   * @param {number} min
+   * @param {number} max
+   * @param {number} value - Default value
+   * @param {(value: number): void} onInput - Called when value changes
+   * @return {HTMLInputElement}
+   */
   static number(min, max, value, onInput) {
     const number = document.createElement("input");
     number.setAttribute("type", "number");
@@ -280,6 +382,11 @@ class ElementBuilder {
     return number;
   }
 
+  /**
+   * @param {[string, string, boolean][]} options - 1. Language code, 2. Native language name, 3. Is Selected
+   * @param {(code: string): void} onSelect - Called with new language code when language changed
+   * @return {HTMLDivElement}
+   */
   static select(options, onSelect) {
     const selectDiv = document.createElement("div")
     selectDiv.classList.add("select");
@@ -327,6 +434,11 @@ class ElementBuilder {
     return selectDiv;
   }
 
+  /**
+   * @param {string} text
+   * @param onClick - Called when button is clicked
+   * @return {HTMLButtonElement}
+   */ 
   static button(text, onClick) {
     const button = document.createElement("button");
     button.innerText = text;
@@ -343,8 +455,8 @@ class Parser {
   /*
    * Usually has to be called as return statement in child
    * classes.
-   * @param source string
-   * @return parsed string
+   * @param {string} source
+   * @return {string} Parsed string including native copyright notice
    */ 
   parse(source) {
     const copyrightNotice = `<footer><p>${Language.copyright()}</p></footer>`;
@@ -365,6 +477,10 @@ class Parser {
 class MarkdownData {
   #videos = new Array();
 
+  /**
+   * Gets called when the markdown viewport setOpen function is called
+   * @param {boolean} open
+   */
   setOpen(open) {
     if (open)
       this.#videos.forEach(video => video.playVideo ? video.playVideo() : {});
@@ -372,10 +488,16 @@ class MarkdownData {
       this.#videos.forEach(video => video.stopVideo());
   }
 
+  /**
+   * Called when the markdown viewport destroy function is called
+   */ 
   destroy() {
     this.#videos.forEach(video => video.destroy());
   }
 
+  /**
+   * @param {YT.Player} video - Video to be registered by the markdown data object
+   */ 
   addVideo(video) {
     this.#videos.push(video);
   }
@@ -385,6 +507,10 @@ class MarkdownData {
  * Parser for markdown-like viewport files
  */ 
 class MarkdownParser extends Parser {
+  /**
+   * @param {string} vrefs - Viewport references
+   * @return {string} - Parsed to native html
+   */ 
   static #parseVrefs(vrefs) {
     return `<div class="vrefs">
       ${vrefs.replace(/\[(.*)\]\((.*)\)\((.*)\)/g, (_, vrefText, vrefImg, vref) => `
@@ -396,22 +522,32 @@ class MarkdownParser extends Parser {
     </div>`;
   }
 
+  /**
+   * @param {string} extern - Type of extern media object
+   * @param {string} externArgs - Usage defined by extern media object
+   * @param {string} media - Usage defined by extern media object
+   * @return {string} - Parsed to native html
+   */ 
   static #parseExternMedia(extern, externArgs, media) {
     switch (extern) {
-    case "yt":
-      return `<div
-        class="video${externArgs ? ` ${externArgs}` : ""}"
-        id="player-${(64 * Math.random()).toString(16)}"
-        data-id="${media}"
-      ></div>`;
-    case "cfg":
-      return `<div class="cfg ${media}" data-args="${externArgs}"></div>`;
-    default:
-      console.error(`Extern partner "${extern}" not supported!`);
-      return "";
+      case "yt":
+        return `<div
+          class="video${externArgs ? ` ${externArgs}` : ""}"
+          id="player-${(64 * Math.random()).toString(16)}"
+          data-id="${media}"
+        ></div>`;
+      case "cfg":
+        return `<div class="cfg ${media}" data-args="${externArgs}"></div>`;
+      default:
+        console.error(`Extern partner "${extern}" not supported!`);
+        return "";
     }
   }
 
+  /**
+   * @param {string} source
+   * @return {string} Native html
+   */
   parse(source) {
     const regex = /(?:# (.*))|(?:## (.*))|(?:\{([^}]*)\})|(?:!\[{2}(?:([^(\n]*)\(?([^)\n]*)\)?:)?(.*)\]{2})|(^.*)/gm;
     const html = source.replace(regex, (_, h1, h2, vrefs, extern, externArgs, media, p) => {
@@ -441,6 +577,10 @@ class MarkdownParser extends Parser {
     return super.parse(html);
   }
 
+  /**
+   * @param {HTMLElement} dom -  Viewport article element
+   * @return {MarkdownData}
+   */
   setup(dom) {
     super.setup(dom);
 
@@ -449,7 +589,10 @@ class MarkdownParser extends Parser {
     dom.querySelectorAll(".hyperlink, .vref").forEach(link => {
       const id = link.getAttribute("data-href");
       link.addEventListener("click", () => {
-        Explorer.openFile(id, new MarkdownParser());
+
+        Explorer.openFile(id);
+        ViewportPool.open(id, new MarkdownParser());
+
         if (Nav.getCurrent())
           Nav.getCurrent().setAttribute("data-open", false);
       });
@@ -497,6 +640,10 @@ class ErrorParser extends MarkdownParser {
     this.#error = error;
   }
 
+  /**
+   * @param {string} source
+   * @return {string}
+   */ 
   parse(source) {
     return super.parse(source.concat(`<code>Code: ${this.#error}</code>`));
   }
@@ -507,6 +654,11 @@ class ErrorParser extends MarkdownParser {
  * overwritten setup function
  */ 
 class SettingsParser extends MarkdownParser {
+
+  /**
+   * @param {HTMLElement} dom - Viewport article element
+   * @return {MarkdownData}
+   */
   setup(dom) {
     const data = super.setup(dom);
 
@@ -566,19 +718,27 @@ class SettingsParser extends MarkdownParser {
     // Reset
     const resetDom = dom.querySelector(".cfg.reset");
     if (resetDom) {
-      const reset = ElementBuilder.button(resetDom.getAttribute("data-args"), Theme.default);
+      const reset = ElementBuilder.button(resetDom.getAttribute("data-args"), () => {
+        Theme.default();
+        ViewportPool.softReload("settings", new SettingsParser());
+      });
       resetDom.after(reset);
       resetDom.remove();
     }
 
     return data;
-  }  
+  }
 }
 
 /*
  * Parser for `explorer.viewport`
  */
 class ExplorerParser extends Parser {
+
+  /**
+   * @param {string} source
+   * @return {string}
+   */ 
   parse(source) {
     const regex = /(?:\[(.*)\]\((.*)\)(!)?\s*\{)|(?:\[(.*)\]\((.*)\))|(\})/gm;
     return source.replace(regex, (_, fRefText, fRef, fOpen, refText, ref, fKnee) => {
@@ -598,6 +758,10 @@ class ExplorerParser extends Parser {
     });
   }
 
+  /**
+   * @param {HTMLElement} dom -  Viewport article element
+   * @return {MarkdownData}
+   */
   setup(dom) {
     super.setup(dom);
 
@@ -605,7 +769,9 @@ class ExplorerParser extends Parser {
       .querySelectorAll(".file")
       .forEach(file => file.addEventListener("click", () => {
         const ref = file.getAttribute("data-href");
-        Explorer.openFile(ref, new MarkdownParser());
+
+        Explorer.openFile(ref);
+        ViewportPool.open(ref, new MarkdownParser());
       }));
 
     dom
@@ -616,8 +782,10 @@ class ExplorerParser extends Parser {
 
         header.addEventListener("click", () => {
           folder.setAttribute("data-open", true);
+
           const ref = header.getAttribute("data-href");
-          Explorer.openFile(ref, new MarkdownParser());
+          Explorer.openFile(ref);
+          ViewportPool.open(ref, new MarkdownParser());
         });
 
         arrow.addEventListener("click", e => {
@@ -636,31 +804,54 @@ class Viewport {
   #dom;
   #data;
 
-  constructor() {
-    const dom = document.createElement("article", { "data-open": false });
+  constructor(id) {
+    const dom = document.createElement("article");
+    dom.setAttribute("data-open", false);
+    dom.setAttribute("data-id", id);
     this.#dom = dom;
   }
 
+  /**
+   * @param {string} source
+   * @param {Parser} parser
+   */ 
   async load(source, parser) {
     const raw = await source.text();
     this.#dom.innerHTML = parser.parse(raw);
     this.#data = parser.setup(this.#dom);
   }
 
+  /**
+   * Links this viewport to the application
+   * @param {HTMLElement} editor - DOM Element of the editor
+   */ 
   link(editor) {
     editor.appendChild(this.#dom);
   }
 
+  /**
+   * Removes everything (including memory) of this viewport
+   */
   destroy() {
     this.#dom.remove();
     if (this.#data)
       this.#data.destroy();
   }
 
+  /**
+   * @param {boolean} open - Reveals viewport if true, else hides it
+   */
   setOpen(open) {
     this.#dom.setAttribute("data-open", open);
     if (this.#data)
       this.#data.setOpen(open);
+  }
+
+  /**
+   * @return {string} Viewport id
+   */ 
+  getId() {
+    return this.#dom.getAttribute("data-id");
   }
 }
 
@@ -674,15 +865,25 @@ class ViewportPool {
 
   static #onOpen = new Array();
 
+  /**
+   * @param {(viewport: Viewport): void} fn - Called whenever a viewport gets opened up
+   */ 
   static addOnOpen(fn) {
     ViewportPool.#onOpen.push(fn);
   }
 
+  /**
+   * Loads Viewport into memory and reveals it to the user
+   *
+   * @param {string} id - See 'ViewportPool.load'
+   * @param {Parser} parser - See 'ViewportPool.load'
+   */ 
   static open(id, parser) {
     JobPool.add(async () => {
 
       // Hide the explorer at every page load on mobile
-      Settings.onMobile(() => Explorer.setOpen(false));
+      if (Settings.isMobile())
+        Explorer.setOpen(false);
 
       // Load if viewport is not loaded yet
       // In both cases hide the current viewport
@@ -695,14 +896,26 @@ class ViewportPool {
       ViewportPool.#current.setOpen(true);
       ViewportPool.#editor.scrollTo(0, 0);
 
-      ViewportPool.#onOpen.forEach(fn => fn());
+      ViewportPool.#onOpen.forEach(fn => fn(ViewportPool.#current));
     });
   }
 
+  /**
+   * Loads viewport into memory
+   *
+   * @param {string} id - Viewport id to be opened
+   * @param {Parser} parser - Parser with which the correlating *.viewport file should be parsed
+   */ 
   static load(id, parser) {
     JobPool.add(async () => ViewportPool.#load(id, parser));
   }
 
+  /**
+   * Reloads memory of already loaded Viewport from scratch
+   *
+   * @param {string} id - See 'ViewportPool.load'
+   * @param {Parser} parser - See 'ViewportPool.load'
+   */ 
   static softReload(id, parser) {
     JobPool.add(async () => {
       const source = Source.open(`${Language.path()}/${id}.viewport`);
@@ -710,6 +923,9 @@ class ViewportPool {
     });
   }
 
+  /**
+   * Destroys all viewports and frees its memory
+   */
   static clear() {
     JobPool.add(async () => {
       ViewportPool.#viewports.forEach(viewport => viewport.destroy());
@@ -717,8 +933,12 @@ class ViewportPool {
     });
   }
 
+  /**
+   * @param {string} id - See 'ViewportPool.load'
+   * @param {Parser} parser - See 'ViewportPool.load'
+   */ 
   static async #load(id, parser) {
-    const viewport = new Viewport(ViewportPool.#editor);
+    const viewport = new Viewport(id);
     const source = Source.open(`${Language.path()}/${id}.viewport`);
     await viewport.load(source, parser);
 
@@ -729,6 +949,13 @@ class ViewportPool {
 
     ViewportPool.#viewports.set(id, viewport);
   }
+
+  /**
+   * @return {string} Viewport id of the currently opened viewport
+   */ 
+  static getCurrentId() {
+    return ViewportPool.#current.getId();
+  }
 }
 
 /**
@@ -736,8 +963,11 @@ class ViewportPool {
  */
 class Explorer {
   static #explorer = document.getElementById("Explorer");
-  static #currentFile;
+  static #currentFile = null;
 
+  /**
+   * Has to be called once before usage
+   */
   static init() {
     JobPool.add(async () => {
       const source = Source.open(`${Language.path()}/explorer.viewport`);
@@ -747,20 +977,29 @@ class Explorer {
     }); 
   }
 
+  /**
+   * @return {boolean} true if explorer is visible
+   */ 
   static isOpen() {
     return Explorer.#explorer.getAttribute("data-open") == "true";
   }
-  
+ 
+  /**
+   * Visually opens the specified file and all its parent folders
+   *
+   * @param {boolean} open - Reveals the explorer to the user if true, else hides it
+   */ 
   static setOpen(open) {
     Explorer.#explorer.setAttribute("data-open", open);
   }
 
-  static openFile(id, parser) {
+  /**
+   * @param {string} id
+   */ 
+  static openFile(id) {
     const file = Explorer.#explorer.querySelector(`[data-href=${id}]`);
     if (file) {
-      ViewportPool.open(id, parser);
-
-      if (Explorer.#currentFile)
+      if (Explorer.#currentFile !== null)
         Explorer.#currentFile.setAttribute("data-open", false);
 
       file.setAttribute("data-open", true);
@@ -778,6 +1017,17 @@ class Explorer {
 
     Explorer.#currentFile = file;
   }
+
+  /**
+   * Visually closes current file
+   */ 
+  static closeCurrentFile() {
+    if (Explorer.#currentFile === null)
+      return;
+
+    Explorer.#currentFile.setAttribute("data-open", false);
+    Explorer.#currentFile = null;
+  }
 }
 
 /**
@@ -790,51 +1040,117 @@ class Nav {
   static #contact = document.getElementById("NavContact");
   static #copyright = document.getElementById("NavCopyright");
   static #settings = document.getElementById("NavSettings");
-  static #current = Nav.#home;
+  static #current = null;
 
-  static #setCallback (button, id, parser) {
-    button.addEventListener("click", () => {
-      if (Settings.isMobile() || !Explorer.isOpen())
-        Nav.#explorer.setAttribute("data-open", false);
-
-      if (Nav.#current == button)
-        return;
-
-      if (Nav.#current)
-        Nav.#current.setAttribute("data-open", false);
-
-      Nav.#current = button;
-      Nav.#current.setAttribute("data-open", true);
-      ViewportPool.open(id, parser);
-    });
-  }
-
+  /**
+   * Has to be called once before usage
+   */
   static init() {
-    Nav.#setCallback(Nav.#home, "home", new MarkdownParser());
-    Nav.#setCallback(Nav.#about, "about", new MarkdownParser());
-    Nav.#setCallback(Nav.#contact, "contact", new MarkdownParser());
-    Nav.#setCallback(Nav.#copyright, "copyright", new MarkdownParser());
-    Nav.#setCallback(Nav.#settings, "settings", new SettingsParser());
+    // Setup home button
+    Nav.#home.addEventListener("click", () => {
+      Explorer.closeCurrentFile();
+      Explorer.setOpen(false);
+      ViewportPool.open("home", new MarkdownParser());
+    });
 
+    // Setup about button
+    Nav.#about.addEventListener("click", () => {
+      Explorer.closeCurrentFile();
+      Explorer.setOpen(false);
+      ViewportPool.open("about", new MarkdownParser());
+    });
+
+    // Setup contact button
+    Nav.#contact.addEventListener("click", () => {
+      Explorer.closeCurrentFile();
+      Explorer.setOpen(false);
+      ViewportPool.open("contact", new MarkdownParser());
+    });
+
+    // Setup copyright button
+    Nav.#copyright.addEventListener("click", () => {
+      Explorer.closeCurrentFile();
+      Explorer.setOpen(false);
+      ViewportPool.open("copyright", new MarkdownParser());
+    });
+
+    // Setup settings button
+    Nav.#settings.addEventListener("click", () => {
+      Explorer.closeCurrentFile();
+      Explorer.setOpen(false);
+      ViewportPool.open("settings", new SettingsParser());
+    });
+
+    // Setup explorer button
     Nav.#explorer.addEventListener("click", () => {
       const newState = !Explorer.isOpen();
 
+      // If explorer was closed and is now opening again
       if (newState) {
-        if (Nav.#current)
-          Nav.#current.setAttribute("data-open", false);
-
-        Nav.#current = null;
-
-        Explorer.openFile("projects", new MarkdownParser());
+        Explorer.openFile("projects");
+        ViewportPool.open("projects", new MarkdownParser());
       }
 
       JobPool.add(async () => Explorer.setOpen(newState));
-      Nav.#explorer.setAttribute("data-open", newState);
     });
-      
-  	JobPool.add(async () => {
-      document.querySelector(".hyperlink[data-href=about]").addEventListener("click", () => Nav.#about.click());
-      document.querySelector(".hyperlink[data-href=contact]").addEventListener("click", () => Nav.#contact.click());
+
+    ViewportPool.addOnOpen(v => {
+      console.log(v.getId());
+      switch (v.getId()) {
+        case "home":
+          if (Nav.#current !== null)
+            Nav.#current.setAttribute("data-open", false);
+
+          Nav.#current = Nav.#home;
+          Nav.#current.setAttribute("data-open", true);
+
+          break;
+        case "about":
+          if (Nav.#current !== null)
+            Nav.#current.setAttribute("data-open", false);
+
+          Nav.#current = Nav.#about;
+          Nav.#current.setAttribute("data-open", true);
+
+          break;
+        case "contact":
+          if (Nav.#current !== null)
+            Nav.#current.setAttribute("data-open", false);
+
+          Nav.#current = Nav.#contact;
+          Nav.#current.setAttribute("data-open", true);
+
+          break;
+        case "copyright":
+          if (Nav.#current !== null)
+            Nav.#current.setAttribute("data-open", false);
+
+          Nav.#current = Nav.#copyright;
+          Nav.#current.setAttribute("data-open", true);
+
+          break;
+        case "settings":
+          if (Nav.#current !== null)
+            Nav.#current.setAttribute("data-open", false);
+
+          Nav.#current = Nav.#settings;
+          Nav.#current.setAttribute("data-open", true);
+
+          break;
+        case "error":
+          if (Nav.#current === null)
+            break;
+
+          Nav.#current.setAttribute("data-open", false);
+          Nav.#current = null
+
+          break;
+        default:
+          if (Nav.#current !== null && !Explorer.isOpen())
+            Nav.#current.setAttribute("data-open", false);
+
+          break;
+      }
     });
   }
 
@@ -857,26 +1173,38 @@ function loadAPI(src) {
 /**
  * Entry point
  */ 
-async function main() {
+(async () => {
   loadAPI("https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js");
   loadAPI("https://www.youtube.com/iframe_api");
   
   ElementBuilder.init();
   Settings.init();
+
+  ViewportPool.addOnOpen(v => Settings.setLink(v.getId()));
   
   Language.set(User.preferedLanguage());
   Theme.setColor(User.preferedColor());
   Theme.setFontSize(User.preferedFontSize());
-  ViewportPool.open("home", new MarkdownParser());
+  Theme.setFont(User.preferedFont());
 
-  Explorer.init();
   Nav.init();
+  Explorer.init();
 
   // Turn on the Job Pool
   setInterval(JobPool.exec);
   
-  Theme.setFont(User.preferedFont());
-}
-
-main()
+  // Open viewport depending on the current link
+  const link = Settings.getLink();
+  switch (link) {
+    case null:
+    case "home":
+    case "error":
+    case "settings":
+      ViewportPool.open("home", new MarkdownParser());
+      break;
+    default:
+      ViewportPool.open(link, new MarkdownParser());
+      break;
+  }
+})();
 
