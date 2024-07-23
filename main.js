@@ -964,6 +964,7 @@ class ViewportPool {
 class Explorer {
   static #explorer = document.getElementById("Explorer");
   static #currentFile = null;
+  static onOpen;
 
   /**
    * Has to be called once before usage
@@ -991,6 +992,7 @@ class Explorer {
    */ 
   static setOpen(open) {
     Explorer.#explorer.setAttribute("data-open", open);
+    Explorer.onOpen(open);
   }
 
   /**
@@ -1093,6 +1095,7 @@ class Nav {
 
       JobPool.add(async () => Explorer.setOpen(newState));
     });
+    Explorer.onOpen = open => Nav.#explorer.setAttribute("data-open", open);
 
     ViewportPool.addOnOpen(v => {
       console.log(v.getId());
@@ -1137,17 +1140,12 @@ class Nav {
           Nav.#current.setAttribute("data-open", true);
 
           break;
-        case "error":
+        default:
           if (Nav.#current === null)
             break;
 
           Nav.#current.setAttribute("data-open", false);
           Nav.#current = null
-
-          break;
-        default:
-          if (Nav.#current !== null && !Explorer.isOpen())
-            Nav.#current.setAttribute("data-open", false);
 
           break;
       }
