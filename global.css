@@ -408,6 +408,54 @@ article figure.vref > figcaption {
   transition: color 200ms;
 }
 
+#PortfolioViewerHelp {
+  position: fixed;
+  bottom: 1%;
+  right: 1%;
+  background: none;
+  border: none;
+  padding: 0;
+  height: 15vh;
+  width: 15vh;
+  fill: var(--light);
+}
+
+#PortfolioViewerTutorial {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#PortfolioViewerTutorial > rect.background {
+  background-color: var(--black);
+  width: 100vw;
+  height: 100vh;
+  opacity: 80%;
+}
+
+.tutorial-bubble {
+  mask-image: radial-gradient(circle, var(--black) 50%, );
+}
+
+#PortfolioViewerHelp[data-open=false] {
+  display: none;
+}
+
+#PortfolioViewerTutorial[data-open=false] {
+  display: none;
+}
+
+text {
+  fill: var(--white);
+}
+
+text > tspan {
+  text-decoration: underline;
+  cursor: pointer;
+  dy: 1.4em;
+}
+
 @media (any-hover: hover) {
   .file:hover, .folder-header:hover,
   .folder-header:hover > .folder-arrow {
@@ -439,6 +487,14 @@ article figure.vref > figcaption {
   article figure.vref:hover > figcaption {
     color: white;
     mix-blend-mode: difference;
+  }
+
+  #PortfolioViewerHelp {
+    right: 2%;
+  }
+
+  #PortfolioViewerHelp:hover {
+    fill: var(--light-gray);
   }
 }
 

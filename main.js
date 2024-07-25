@@ -35,8 +35,7 @@ class JobPool {
 
     JobPool.#jobs.length = 0;
 
-    for (const job of JobPool.#loopJobs)
-      await job(); 
+    await Promise.all(JobPool.#loopJobs); 
 
     JobPool.#running = false;
   }
@@ -249,7 +248,6 @@ class Language {
       Language.#current = code;
       Language.#data = await Source.open(`${Language.path()}/data.json`).json();
       document.querySelector(".title > .tab-text").innerText = Language.#data.name;
-      User.setLanguage(code);
     });
   }
 
@@ -272,6 +270,13 @@ class Language {
    */
   static copyright() {
     return Language.#data.copyrightNotice;
+  }
+
+  /**
+   * @return {Object}
+   */
+  static tutorial() {
+    return Language.#data.tutorial;
   }
 }
 
@@ -329,7 +334,18 @@ class User {
    */
   static preferedLanguage() {
     const language = localStorage.getItem("preferedLanguage");
-    return language ? language : "de";
+    if (language)
+      return language;
+
+    for (const userLanguage of navigator.languages) {
+      for (const [availableLanguage, _] of Settings.languages()) {
+        if (userLanguage.toLowerCase().includes(availableLanguage)) {
+          return availableLanguage;
+        }
+      }
+    }
+
+    return "en";
   }
 
   /**
@@ -337,6 +353,21 @@ class User {
    */
   static setLanguage(code) {
     localStorage.setItem("preferedLanguage", code);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  static tutorialized() {
+    const tutorialized = localStorage.getItem("tutorialized");
+    return tutorialized == "true";
+  }
+
+  /**
+   * @param {boolean} tutorialized
+   */
+  static setTutorialized(tutorialized) {
+    localStorage.setItem("tutorialized", tutorialized);
   }
 }
 
@@ -669,6 +700,7 @@ class SettingsParser extends MarkdownParser {
         Settings.languages().map(([code, lang]) => [code, lang, code == Language.current()]),
         code => {
           Language.set(code);
+          User.setLanguage(code);
           ViewportPool.clear();
           ViewportPool.open("settings", new SettingsParser());
           Explorer.init();
@@ -713,6 +745,14 @@ class SettingsParser extends MarkdownParser {
       const fontSize = ElementBuilder.number(8, 24, Theme.currentFontSize(), Theme.setFontSize);
       fontSizeDom.after(fontSize);
       fontSizeDom.remove();
+    }
+
+    // Tutorial
+    const tutorialDom = dom.querySelector(".cfg.tutorial");
+    if (tutorialDom) {
+      const tutorial = ElementBuilder.button(tutorialDom.getAttribute("data-args"), Tutorial.loadTutorial);
+      tutorialDom.after(tutorial);
+      tutorialDom.remove();
     }
 
     // Reset
@@ -793,6 +833,55 @@ class ExplorerParser extends Parser {
           folder.setAttribute("data-open", folder.getAttribute("data-open") == "false");
         });
       });
+  }
+}
+
+class TutorialParser extends Parser {
+  /**
+   * @param {string} source
+   * @return {string}
+   */
+  parse(source) {
+    return source.replace(/\$(\w*)/g, (_, n) => Language.tutorial()[n]);
+  }
+
+  /**
+   * @param {HTMLELement} dom
+   */
+  setup(dom) {
+    const rect = dom.querySelector("rect.background");
+    const useTag = dom.querySelector("use.texter");
+
+    const setTutor = index => {
+      rect.setAttribute("mask", `url(#mask${index})`);
+      useTag.setAttribute("href", `#text${index}`);
+      useTag.setAttribute("xlink:href", `#text${index}`);
+      
+      const bRect = Nav.getObjectPos(index);
+      if (bRect) {
+        const circle = dom.querySelector(`#mask${index} circle`);
+        const x = bRect.x + bRect.width / 2;
+        const y = bRect.y + bRect.height / 2;
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        useTag.setAttribute("x", x + 32);
+        useTag.setAttribute("y", y - 16);
+      }
+    };
+
+    setTutor(0);
+
+    const nexts = dom.querySelectorAll("tspan");
+    nexts.forEach((next, n) => {
+      const i = n + 1;
+      if (i < nexts.length)
+        next.addEventListener("click", () => setTutor(i));
+      else
+        next.addEventListener("click", () => {
+          dom.remove();
+          User.setTutorialized(true);
+        });
+    });
   }
 }
 
@@ -1098,7 +1187,6 @@ class Nav {
     Explorer.onOpen = open => Nav.#explorer.setAttribute("data-open", open);
 
     ViewportPool.addOnOpen(v => {
-      console.log(v.getId());
       switch (v.getId()) {
         case "home":
           if (Nav.#current !== null)
@@ -1155,28 +1243,111 @@ class Nav {
   static getCurrent() {
     return Nav.#current;
   }
+
+  /**
+   * @param {number} id
+   * @return {?DOMRect}
+   */
+  static getObjectPos(objCode) {
+    switch (objCode) {
+      case 0:
+        return Nav.#home.getBoundingClientRect();
+      case 1:
+        return Nav.#explorer.getBoundingClientRect();
+      case 2:
+        return Nav.#about.getBoundingClientRect();
+      case 3:
+        return Nav.#contact.getBoundingClientRect();
+      case 4:
+        return Nav.#copyright.getBoundingClientRect();
+      case 5:
+        return Nav.#settings.getBoundingClientRect();
+      default:
+        return null;
+    }
+  }
 }
 
-/**
- * Loads extern api dependencies by inserting a script tag
- * into the head of the dom.
- */ 
-function loadAPI(src) {
-  const tag = document.createElement("script");
-  tag.src = src;
-  const script1 = document.getElementsByTagName("script")[0];
-  script1.parentNode.insertBefore(tag, script1);
+class Tutorial {
+  static #button = document.getElementById("PortfolioViewerHelp");
+
+  static init() {
+    Tutorial.#button.addEventListener("click", () => {
+      Tutorial.#button.setAttribute("data-open", false);
+      Tutorial.loadTutorial();
+    });
+  }
+
+  static async loadTutorial() {
+    const source = await Source.open("tutorial.svg").text();
+    const parser = new TutorialParser();
+    const domParser = new DOMParser();
+    const svg = domParser.parseFromString(parser.parse(source), "text/html").body.firstChild;
+
+    document.body.appendChild(svg);
+    parser.setup(svg);
+  }
+
+  /**
+   * @param {boolean} open
+   */ 
+  static setOpen(open) {
+    Tutorial.#button.setAttribute("data-open", open);
+  }
+}
+
+/*
+ * Helper builder class for loading foreign api's
+ */
+class APILoader {
+  #promises = new Array();
+
+  /*
+   * @return {APILoader}
+   */
+  static create() {
+    return new APILoader();
+  }
+
+  /*
+   * @param {string} src
+   * @return {APILoader}
+   */
+  add(src) {
+    this.#promises.push(new Promise((resolve, reject) => {
+      const tag = document.createElement("script");
+      tag.async = true;
+      tag.onload = resolve;
+      tag.onabort = reject;
+      tag.src = src;
+
+      const script1 = document.getElementsByTagName("script")[0];
+      script1.parentNode.insertBefore(tag, script1);
+    }));
+    return this;
+  }
+
+  /*
+   * @return {Promise}
+   */
+  load() {
+    return Promise.all(this.#promises);
+  }
 }
 
 /**
  * Entry point
  */ 
 (async () => {
-  loadAPI("https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js");
-  loadAPI("https://www.youtube.com/iframe_api");
+  JobPool.add(async () => await APILoader.create()
+    .add("https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js")
+    .add("https://www.youtube.com/iframe_api")
+    .load());
   
   ElementBuilder.init();
   Settings.init();
+
+  await JobPool.exec();
 
   ViewportPool.addOnOpen(v => Settings.setLink(v.getId()));
   
@@ -1187,6 +1358,9 @@ function loadAPI(src) {
 
   Nav.init();
   Explorer.init();
+
+  Tutorial.init();
+  Tutorial.setOpen(!User.tutorialized());
 
   // Turn on the Job Pool
   setInterval(JobPool.exec);
@@ -1204,5 +1378,5 @@ function loadAPI(src) {
       ViewportPool.open(link, new MarkdownParser());
       break;
   }
-})();
+})().catch(console.error);
 
