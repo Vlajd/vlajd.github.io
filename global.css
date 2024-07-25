@@ -410,8 +410,8 @@ article figure.vref > figcaption {
 
 #PortfolioViewerHelp {
   position: fixed;
-  bottom: 0;
-  right: 18px;
+  bottom: 1%;
+  right: 1%;
   background: none;
   border: none;
   padding: 0;
@@ -427,7 +427,7 @@ article figure.vref > figcaption {
   height: 100vh;
 }
 
-#PortfolioViewerTutorial > .background {
+#PortfolioViewerTutorial > rect.background {
   background-color: var(--black);
   width: 100vw;
   height: 100vh;
@@ -440,6 +440,20 @@ article figure.vref > figcaption {
 
 #PortfolioViewerHelp[data-open=false] {
   display: none;
+}
+
+#PortfolioViewerTutorial[data-open=false] {
+  display: none;
+}
+
+text {
+  fill: var(--white);
+}
+
+text > tspan {
+  text-decoration: underline;
+  cursor: pointer;
+  dy: 1.4em;
 }
 
 @media (any-hover: hover) {
@@ -473,6 +487,10 @@ article figure.vref > figcaption {
   article figure.vref:hover > figcaption {
     color: white;
     mix-blend-mode: difference;
+  }
+
+  #PortfolioViewerHelp {
+    right: 2%;
   }
 
   #PortfolioViewerHelp:hover {

@@ -1,14 +1,14 @@
 {
   "name": "Kostadinov Boris - Portfolio Viewer",
   "copyrightNotice": "&#169;2024 Kostadinov Boris − using AI",
-  "toolTips": {
-    "home": "Home",
-    "explorer": "Explorer",
-    "about": "About Me",
-    "contact": "Contact",
-    "copyright": "Copyright",
-    "settings": "Settings",
-    "noPage": "No Page"
+  "tutorial": {
+    "next": "Next...",
+    "_home": "This is the homepage button.",
+    "_explorer": "Open the project explorer here to see all my nice works!",
+    "_about": "Find more about me here.",
+    "_contact": "Want to contact me? Go ahead!",
+    "_copyright": "Just some boring copyright notice, nothing spetial.",
+    "_settings": "And the settings. Change the language, color and font of the portfolio viewer!"
   }
 }
 

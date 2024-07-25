@@ -15,6 +15,10 @@ Is the font too heavy to read? Adjust it so your beautiful eyes can look beautif
 ![[cfg:font]]
 ![[cfg:font-size]]
 
+## Tutorial
+Forgot what all the buttons on the left do? Damn... but it's okay, I should've made the portfolio viewer more user friendly...
+![[cfg(Show Tutorial):tutorial]]
+
 ## Reset
 Don't like how you've set up the Portfolio Viewer? No worries, resetting to default values is really not a big deal... plus, it's the original look, right?
 ![[cfg(Reset):reset]]

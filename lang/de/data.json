@@ -1,14 +1,14 @@
 {
   "name": "Kostadinov Boris - Portfolio Viewer",
   "copyrightNotice": "&#169;2024 Kostadinov Boris",
-  "toolTips": {
-    "home": "Zur Startseite",
-    "explorer": "Entdecker",
-    "about": "Über mich",
-    "contact": "Kontakt",
-    "copyright": "Kopierrecht",
-    "settings": "Einstellungen",
-    "noPage": "Keine Seite"
+  "tutorial": {
+    "next": "Weiter...",
+    "_home": "Über diesen Button gelangst Du zur Startseite.",
+    "_explorer": "Mit diesen Button öffnest du den Projekt-Explorer. Hier kannst du all meine Projekte finden!",
+    "_about": "Lebensgeschichte gefällig? Bitte hierher!",
+    "_contact": "Möchtest Du mich kontaktieren? Bitte hierher!",
+    "_copyright": "Deine und meine Rechte zur Nutzung des Portfolio Viewers und deren Inhalten kannst du hier nachlesen.",
+    "_settings": "Hier kannst du alle Einstellungsmöglichkeiten wie Farbe, Schriftgröße und sogar Sprache!"
   }
 }
 
