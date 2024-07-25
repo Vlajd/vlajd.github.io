@@ -750,7 +750,9 @@ class SettingsParser extends MarkdownParser {
     // Tutorial
     const tutorialDom = dom.querySelector(".cfg.tutorial");
     if (tutorialDom) {
-      const tutorial = ElementBuilder.button(tutorialDom.getAttribute("data-args"), Tutorial.loadTutorial);
+      const tutorial = ElementBuilder.button(tutorialDom.getAttribute("data-args"), () => JobPool.add(async () => {
+        await Tutorial.loadTutorial();
+      }));
       tutorialDom.after(tutorial);
       tutorialDom.remove();
     }
@@ -1273,12 +1275,12 @@ class Tutorial {
 
   static init() {
     Tutorial.#button.addEventListener("click", () => {
-      Tutorial.#button.setAttribute("data-open", false);
       Tutorial.loadTutorial();
     });
   }
 
   static async loadTutorial() {
+    Tutorial.#button.setAttribute("data-open", false);
     const source = await Source.open("tutorial.svg").text();
     const parser = new TutorialParser();
     const domParser = new DOMParser();
