@@ -308,6 +308,7 @@ nav {
   background-color: var(--black);
   width: 100%;
   height: 100%;
+  overflow-x: hidden;
   overflow-y: scroll;
 }
 
@@ -448,6 +449,7 @@ article figure.vref > figcaption {
 
 text {
   fill: var(--white);
+  font-size: min(var(--font-size), 2vw);
 }
 
 text > tspan {
@@ -530,7 +532,7 @@ text > tspan {
   }
 }
 
-@media (max-height: 600px) {
+@media (max-height: 600px) or (max-width: 600px) {
   header {
     display: none;
   }

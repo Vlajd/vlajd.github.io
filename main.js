@@ -28,15 +28,23 @@ class JobPool {
     if (JobPool.#running)
       return;
 
+    // Lock the job pool
     JobPool.#running = true;
 
+    // Execute loop jobs and save its promises
+    const loopPromises = JobPool.#loopJobs.map(job => job());
+
+    // Run all regular jobs in order
     for (const job of JobPool.#jobs)
       await job();
 
+    // Clear the list of regular jobs
     JobPool.#jobs.length = 0;
 
-    await Promise.all(JobPool.#loopJobs); 
+    // Wait for all loop jobs to finish
+    await Promise.all(loopPromises);
 
+    // Unlock the job pool
     JobPool.#running = false;
   }
 }
@@ -103,6 +111,21 @@ class Settings {
 
     // Update if screen changes to mobile
     JobPool.addLoop(async () => Settings.#isMobile = outerWidth <= 1024);
+
+    window.addEventListener("popstate", () => {
+      let link = Settings.getLink();
+      switch (link) {
+        case "settings":
+          ViewportPool.open("settings", new SettingsParser());
+          break;
+        case null:
+          link = "home";
+        default:
+          ViewportPool.open(link, new MarkdownParser());
+          Explorer.openFile(link);
+          break;
+      }
+    });    
   }
 
   /**
@@ -148,6 +171,13 @@ class Settings {
    */ 
   static setLink(link) {
     history.replaceState(null, null, `?${link}`);
+  }
+
+  /**
+   * @param {string} link - Link, which should be setted
+   */ 
+  static pushLink(link) {
+    history.pushState(null, null, `?${link}`);
   }
 }
 
@@ -195,7 +225,7 @@ class Theme {
    */
   static setFont(font) {
     JobPool.add(async () => {
-      WebFont.load({
+      APILoader.WebFont.load({
         google: {
           families: [`${font}:300,400`]
         },
@@ -330,7 +360,7 @@ class User {
   }
 
   /**
-   * @return {string} Prefered language code. If none, defaults to "de".
+   * @return {string} Prefered language code (either stored or browser default). If none, defaults to "en".
    */
   static preferedLanguage() {
     const language = localStorage.getItem("preferedLanguage");
@@ -527,7 +557,7 @@ class MarkdownData {
   }
 
   /**
-   * @param {YT.Player} video - Video to be registered by the markdown data object
+   * @param {APILoader.YT.Player} video - Video to be registered by the markdown data object
    */ 
   addVideo(video) {
     this.#videos.push(video);
@@ -633,7 +663,7 @@ class MarkdownParser extends Parser {
       const id = frame.getAttribute("id");
       const videoId = frame.getAttribute("data-id");
       JobPool.add(async () => {
-        const video = new YT.Player(id, {
+        const video = new APILoader.YT.Player(id, {
           videoId,
           playerVars: {
             autoplay: 1,
@@ -814,6 +844,7 @@ class ExplorerParser extends Parser {
 
         Explorer.openFile(ref);
         ViewportPool.open(ref, new MarkdownParser());
+        Settings.pushLink(ref);
       }));
 
     dom
@@ -828,6 +859,7 @@ class ExplorerParser extends Parser {
           const ref = header.getAttribute("data-href");
           Explorer.openFile(ref);
           ViewportPool.open(ref, new MarkdownParser());
+          Settings.pushLink(ref);
         });
 
         arrow.addEventListener("click", e => {
@@ -854,8 +886,10 @@ class TutorialParser extends Parser {
     const rect = dom.querySelector("rect.background");
     const useTag = dom.querySelector("use.texter");
 
-    const setTutor = index => {
+    const setTutor = (index) => {
+      rect.tutorialIndex = index
       rect.setAttribute("mask", `url(#mask${index})`);
+
       useTag.setAttribute("href", `#text${index}`);
       useTag.setAttribute("xlink:href", `#text${index}`);
       
@@ -866,23 +900,44 @@ class TutorialParser extends Parser {
         const y = bRect.y + bRect.height / 2;
         circle.setAttribute("cx", x);
         circle.setAttribute("cy", y);
-        useTag.setAttribute("x", x + 32);
-        useTag.setAttribute("y", y - 16);
+        useTag.setAttribute("x", x + 48);
+        useTag.setAttribute("y", y - 8);
       }
     };
 
     setTutor(0);
 
     const nexts = dom.querySelectorAll("tspan");
+
+    rect.addEventListener("click", e => {
+      e.stopPropagation();
+
+      const i = rect.tutorialIndex + 1; 
+
+      if (i < nexts.length) {
+        setTutor(i);
+        return;
+      }
+
+      dom.remove();
+      User.setTutorialized(true);
+    });
+
     nexts.forEach((next, n) => {
       const i = n + 1;
-      if (i < nexts.length)
-        next.addEventListener("click", () => setTutor(i));
-      else
-        next.addEventListener("click", () => {
-          dom.remove();
-          User.setTutorialized(true);
+
+      if (i < nexts.length) {
+        next.addEventListener("click", e => {
+          e.stopPropagation();
+          setTutor(i);
         });
+        return;
+      }
+
+      next.addEventListener("click", () => {
+        dom.remove();
+        User.setTutorialized(true);
+      });
     });
   }
 }
@@ -1077,8 +1132,6 @@ class Explorer {
   }
  
   /**
-   * Visually opens the specified file and all its parent folders
-   *
    * @param {boolean} open - Reveals the explorer to the user if true, else hides it
    */ 
   static setOpen(open) {
@@ -1087,11 +1140,16 @@ class Explorer {
   }
 
   /**
+   * Visually opens the specified file and all its parent folders
+   *
    * @param {string} id
    */ 
   static openFile(id) {
     const file = Explorer.#explorer.querySelector(`[data-href=${id}]`);
     if (file) {
+      if (Settings.isMobile())
+        Explorer.setOpen(false);
+
       if (Explorer.#currentFile !== null)
         Explorer.#currentFile.setAttribute("data-open", false);
 
@@ -1144,6 +1202,7 @@ class Nav {
       Explorer.closeCurrentFile();
       Explorer.setOpen(false);
       ViewportPool.open("home", new MarkdownParser());
+      Settings.pushLink("home");
     });
 
     // Setup about button
@@ -1151,6 +1210,7 @@ class Nav {
       Explorer.closeCurrentFile();
       Explorer.setOpen(false);
       ViewportPool.open("about", new MarkdownParser());
+      Settings.pushLink("about");
     });
 
     // Setup contact button
@@ -1158,6 +1218,7 @@ class Nav {
       Explorer.closeCurrentFile();
       Explorer.setOpen(false);
       ViewportPool.open("contact", new MarkdownParser());
+      Settings.pushLink("contact");
     });
 
     // Setup copyright button
@@ -1165,6 +1226,7 @@ class Nav {
       Explorer.closeCurrentFile();
       Explorer.setOpen(false);
       ViewportPool.open("copyright", new MarkdownParser());
+      Settings.pushLink("copyright");
     });
 
     // Setup settings button
@@ -1172,6 +1234,7 @@ class Nav {
       Explorer.closeCurrentFile();
       Explorer.setOpen(false);
       ViewportPool.open("settings", new SettingsParser());
+      Settings.pushLink("settings");
     });
 
     // Setup explorer button
@@ -1179,9 +1242,11 @@ class Nav {
       const newState = !Explorer.isOpen();
 
       // If explorer was closed and is now opening again
-      if (newState) {
+      // Valid in the context of open nav viewport
+      if (newState && Nav.#current) {
         Explorer.openFile("projects");
         ViewportPool.open("projects", new MarkdownParser());
+        Settings.pushLink("projects");
       }
 
       JobPool.add(async () => Explorer.setOpen(newState));
@@ -1196,6 +1261,7 @@ class Nav {
 
           Nav.#current = Nav.#home;
           Nav.#current.setAttribute("data-open", true);
+          Explorer.setOpen(false);
 
           break;
         case "about":
@@ -1204,6 +1270,7 @@ class Nav {
 
           Nav.#current = Nav.#about;
           Nav.#current.setAttribute("data-open", true);
+          Explorer.setOpen(false);
 
           break;
         case "contact":
@@ -1212,6 +1279,7 @@ class Nav {
 
           Nav.#current = Nav.#contact;
           Nav.#current.setAttribute("data-open", true);
+          Explorer.setOpen(false);
 
           break;
         case "copyright":
@@ -1220,6 +1288,7 @@ class Nav {
 
           Nav.#current = Nav.#copyright;
           Nav.#current.setAttribute("data-open", true);
+          Explorer.setOpen(false);
 
           break;
         case "settings":
@@ -1228,6 +1297,7 @@ class Nav {
 
           Nav.#current = Nav.#settings;
           Nav.#current.setAttribute("data-open", true);
+          Explorer.setOpen(false);
 
           break;
         default:
@@ -1303,6 +1373,10 @@ class Tutorial {
  */
 class APILoader {
   #promises = new Array();
+  #binds = new Array();
+
+  static WebFont = null;
+  static YT = null;
 
   /*
    * @return {APILoader}
@@ -1329,11 +1403,18 @@ class APILoader {
     return this;
   }
 
-  /*
-   * @return {Promise}
+  /**
+   * @param {(): void} bind
+   * @return {APILoader}
    */
-  load() {
-    return Promise.all(this.#promises);
+  bind(bind) {
+    this.#binds.push(bind);
+    return this;
+  }
+
+  async load() {
+    await Promise.all(this.#promises);
+    this.#binds.forEach(bind => bind());
   }
 }
 
@@ -1343,7 +1424,9 @@ class APILoader {
 (async () => {
   JobPool.add(async () => await APILoader.create()
     .add("https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js")
+    .bind(() => APILoader.WebFont = WebFont)
     .add("https://www.youtube.com/iframe_api")
+    .bind(() => APILoader.YT = YT)
     .load());
   
   ElementBuilder.init();
@@ -1351,8 +1434,6 @@ class APILoader {
 
   await JobPool.exec();
 
-  ViewportPool.addOnOpen(v => Settings.setLink(v.getId()));
-  
   Language.set(User.preferedLanguage());
   Theme.setColor(User.preferedColor());
   Theme.setFontSize(User.preferedFontSize());
@@ -1364,21 +1445,27 @@ class APILoader {
   Tutorial.init();
   Tutorial.setOpen(!User.tutorialized());
 
-  // Turn on the Job Pool
-  setInterval(JobPool.exec);
   
   // Open viewport depending on the current link
-  const link = Settings.getLink();
-  switch (link) {
-    case null:
-    case "home":
-    case "error":
-    case "settings":
-      ViewportPool.open("home", new MarkdownParser());
-      break;
-    default:
-      ViewportPool.open(link, new MarkdownParser());
-      break;
-  }
+  JobPool.add(async () => {
+    const link = Settings.getLink();
+    switch (link) {
+      case null:
+      case "home":
+      case "error":
+      case "settings":
+        ViewportPool.open("home", new MarkdownParser());
+        Settings.setLink("home");
+        break;
+      default:
+        ViewportPool.open(link, new MarkdownParser());
+        Explorer.openFile(link);
+        Settings.setLink(link);
+        break;
+    }
+  });
+
+  // Turn on the Job Pool
+  setInterval(JobPool.exec);
 })().catch(console.error);
 
