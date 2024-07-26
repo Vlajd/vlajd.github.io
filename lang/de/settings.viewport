@@ -7,7 +7,7 @@ Handübersetzt von echten Linguisten (mir) sollten Benutzer aller Welt sich ausk
 
 ## Angezeigtes Farbeschema
 Dein Lieblingsschema ist Dunkel, Bunt oder Hell (bah)? Gönn's Dir dann ;)
-![[cfg(dark:Dunkel;light:Hell;caligraphy:Kalligrafie):color]]
+![[cfg(dark:Dunkel;light:Hell;caligraphy:Kalligrafie;duck-on-the-ocean:Ente am Ozean;letters:Letters):color]]
 
 ## Schriftart und Schriftgröße
 Dir ist die Schrift zu schwer zum lesen? Stell's Dir dann ein, damit deine schöne Augen schön schauen können.
@@ -17,7 +17,6 @@ Dir ist die Schrift zu schwer zum lesen? Stell's Dir dann ein, damit deine schö
 ## Anleitung
 Ansich ist der Portfolio Viewer echt nicht schwer zu nutzen, nichts desto trotz ist eine Anleitung vorhanden!
 ![[cfg(Anleitung ansehen):tutorial]]
-
 
 ## Zurücksetzen
 Dir gefällt nicht wie du den Portfolio Viewer eingestellt hast? Keine Scharm, zurücksetzen auf Standartwerte ist echt kein Drama... außerdem ist's der Original-Look, gelt?

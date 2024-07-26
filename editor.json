@@ -27,6 +27,22 @@
       "light-gray": "#ff4848",
       "light": "#404040",
       "white": "#0d0d0d"
+    },
+    "duck-on-the-ocean": {
+      "black": "#000604",
+      "dark-gray": "#000a08",
+      "gray": "#14140f",
+      "light-gray": "#053d38",
+      "light": "#a3ccab",
+      "white": "#f26800"
+    },
+    "letters": {
+      "black": "#ffffff",
+      "dark-gray": "#d0bfa8",
+      "gray": "#bfae97",
+      "light-gray": "#000201",
+      "light": "#0a0a0a",
+      "white": "#0a0a0a"
     }
   },
   "fonts": ["Fira Sans", "Montserrat", "Noto Sans", "Nunito", "Open Sans", "Poppins", "Raleway", "Roboto", "Sofia Sans"]
