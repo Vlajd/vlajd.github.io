@@ -675,8 +675,9 @@
         const id = frame.getAttribute("id");
         const videoId = frame.getAttribute("data-id");
 
-        JobPool.add(async () => (new Promise(resolve => {
-          const video = new APILoader.YT.Player(id, {
+        JobPool.add(() => new Promise(resolve => {
+          let video;
+          video = new APILoader.YT.Player(id, {
             videoId,
             playerVars: {
               autoplay: 1,
@@ -690,13 +691,24 @@
               showinfo: 0
             },
             events: {
-              onReady: () => resolve(video)
+              onReady: _ => {
+                video.setPlaybackQuality("hd720")
+                data.addVideo(video);
+                console.log(video);
+                frame.addEventListener("click", _ => {
+                  switch (video.getPlayerState()) {
+                    case APILoader.YT.PlayerState.UNSTARTED:
+                    case APILoader.YT.PlayerState.ENDED:
+                    case APILoader.YT.PlayerState.PAUSED:
+                      video.playVideo(); 
+                      break;
+                  }
+                });
+                resolve(video);
+              }
             }
           });
-        })).then(video => {
-          video.setPlaybackQuality("hd720")
-          data.addVideo(video);
-        }));
+        }))
       });
 
       return data;

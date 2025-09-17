@@ -73,8 +73,7 @@ button {
   cursor: pointer;
 }
 
-
-.hyperlink, a{
+.hyperlink, a {
   text-decoration: underline;
   cursor: pointer;
   color: var(--white);

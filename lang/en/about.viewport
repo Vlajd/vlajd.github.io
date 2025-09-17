@@ -1,6 +1,6 @@
 # About Boris
 
-In this little world called *Earth*, there exists a certain being called *Human*. Among these *humans*, there is one who doesn't really boast about himself but is greatly praised by many, and his name is *Boris*.
+In this little world called *Earth*, there exists a certain being called *Human*. Among these *humans*, there is one who doesn’t really boast about himself but is greatly praised by many, and his name is *Boris*.
 
 ![[borisCarrot.jpg]]
 
@@ -42,11 +42,11 @@ The fact that the first operating system I ever used was probably *Linux* should
 
 For the first time, I ventured into scripting with [Shut Up and Go](suag), a *first-person shooter* created together with *Gebesmayer Severin*, using a *C# script* for surface animation.
 
-The first project that heavily influenced my current skills is [Fatigue](fatigue), although unsuccessful, it was extremely well-done atmospherically, followed by the art-style nominated game [A Monk's Tale](aMonksTale).
+The first project that heavily influenced my current skills is [Fatigue](fatigue), although unsuccessful, it was extremely well-done atmospherically, followed by the art-style nominated game [A Monk’s Tale](aMonksTale).
 
 In between, I learned graphics programming with *OpenGL* and *Vulkan* and attempted to create my own *C++ game engines*. But one day, my friend Severin came to me and suggested working together on a game engine, this time in the systems programming language *Rust*. With Rust, I learned a new mentality and logic for programming and since then, I can confidently say that I am ready for anything. So, for our game engine [Tarator](tarator), I wrote the [ECS](ecs), an extremely complex and fast system for organizing, retrieving, and manipulating raw data.
 
-All of this gave me the opportunity to work in a summer internship at [Mi'Pu'Mi](https://www.mipumi.com), where I gained a deep insight into the programming work environment and learned a lot about collaboration, independence, organization, and motivation.
+All of this gave me the opportunity to work in a summer internship at [Mi’Pu’Mi](https://www.mipumi.com), where I gained a deep insight into the programming work environment and learned a lot about collaboration, independence, organization, and motivation.
 
 # Skateboarding
 
@@ -69,6 +69,6 @@ Thanks to...
 ...my piano teacher and my conductors
 ...my boys and my girls
 ...my loving cats
-...Mi'Pu'Mi and Lechner
+...Mi’Pu’Mi and Lechner
 ...the Donauinsler
 

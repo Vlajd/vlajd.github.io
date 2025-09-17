@@ -1,6 +1,6 @@
 # Settings
 
-Every program should be configurable, so the Portfolio Viewer (of course) is also customizable according to the user's preferences. Languages, colors, cookies, you can change it all here ;)
+Every program should be configurable, so the Portfolio Viewer (of course) is also customizable according to the user’s preferences. Languages, colors, cookies, you can change it all here ;)
 
 ## Displayed Language
 Hand-translated by real linguists (me), users from all over the world should be able to navigate, everyone should know the Boris (without Becker, Borisov, or Johnson)!
@@ -16,10 +16,10 @@ Is the font too heavy to read? Adjust it so your beautiful eyes can look beautif
 ![[cfg:font-size]]
 
 ## Tutorial
-Forgot what all the buttons on the left do? Damn... but it's okay, I should've made the portfolio viewer more user friendly...
+Forgot what all the buttons on the left do? Damn... but it’s okay, I should’ve made the portfolio viewer more user friendly...
 ![[cfg(Show Tutorial):tutorial]]
 
 ## Reset
-Don't like how you've set up the Portfolio Viewer? No worries, resetting to default values is really not a big deal... plus, it's the original look, right?
+Don’t like how you’ve set up the Portfolio Viewer? No worries, resetting to default values is really not a big deal... plus, it’s the original look, right?
 ![[cfg(Reset):reset]]
 
