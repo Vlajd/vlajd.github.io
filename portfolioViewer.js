@@ -570,6 +570,18 @@
       ? this.#videos.forEach(video => video.playVideo())
       : this.#videos.forEach(video => video.stopVideo());
     }
+
+    tryPlayAllVideos() {
+      this.#videos.forEach(video => {
+        switch (video.getPlayerState()) {
+          case APILoader.YT.PlayerState.UNSTARTED:
+          case APILoader.YT.PlayerState.ENDED:
+          case APILoader.YT.PlayerState.PAUSED:
+            video.playVideo(); 
+            break;
+        }
+      });
+    }
   }
 
   /**
@@ -696,7 +708,6 @@
               onReady: _ => {
                 video.setPlaybackQuality("hd720")
                 data.addVideo(video);
-                console.log(video);
                 frame.addEventListener("click", _ => {
                   switch (video.getPlayerState()) {
                     case APILoader.YT.PlayerState.UNSTARTED:
@@ -1033,6 +1044,11 @@
     getId() {
       return this.#dom.getAttribute("data-id");
     }
+
+    tryPlayAllVideos() {
+      if (this.#data)
+        this.#data.tryPlayAllVideos();
+    }
   }
 
   /**
@@ -1044,6 +1060,12 @@
     static #editor = document.getElementById("Editor");
 
     static #onOpen = new Array();
+
+    static init() {
+      ViewportPool.#editor.addEventListener("click", _ => {
+        ViewportPool.#current.tryPlayAllVideos();
+      });
+    }
 
     /**
      * @param {(viewport: Viewport): void} fn - Called whenever a viewport gets opened up
@@ -1132,6 +1154,10 @@
      */ 
     static getCurrentId() {
       return ViewportPool.#current.getId();
+    }
+
+    static getEditorDom() {
+      return ViewportPool.#editor;
     }
   }
 
@@ -1479,6 +1505,7 @@
   
   ElementBuilder.init();
   Settings.init();
+  ViewportPool.init();
   await JobPool.exec();
 
   Language.set(User.preferedLanguage());
