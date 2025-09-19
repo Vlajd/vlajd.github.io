@@ -607,6 +607,8 @@
           ></div>`;
         case "cfg":
           return `<div class="cfg ${media}" data-args="${externArgs}"></div>`;
+        case "img":
+          return `<img src="${media}" alt=${externArgs}>`;
         default:
           console.error(`Extern partner "${extern}" not supported!`);
           return "";
